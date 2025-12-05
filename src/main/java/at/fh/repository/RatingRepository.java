@@ -1,7 +1,7 @@
 package at.fh.repository;
 
 //Rating+Comment
-public class ReviewRepository
+public class RatingRepository
 {
     //save()
     //findById()
