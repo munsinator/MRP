@@ -45,15 +45,15 @@ CREATE TABLE series (
 
 CREATE TABLE rating (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
+    created_by UUID NOT NULL,
     media_id UUID NOT NULL,
     is_public BOOLEAN NOT NULL DEFAULT FALSE,
     value INT CHECK (value BETWEEN 1 AND 5) NOT NULL,
     comment VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (media_id) REFERENCES media_entry(id) ON DELETE CASCADE,
-    UNIQUE (user_id, media_id)
+    UNIQUE (created_by, media_id)
 );
 
 CREATE TABLE rating_like (
