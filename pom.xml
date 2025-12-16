@@ -14,6 +14,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.sun.net.httpserver/http -->
         <dependency>
             <groupId>com.sun.net.httpserver</groupId>

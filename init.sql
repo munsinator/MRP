@@ -56,3 +56,6 @@ CREATE TABLE media_favorite (
     FOREIGN KEY (media_id) REFERENCES media_entry(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, media_id)
 );
+
+INSERT INTO users (id, username, password_hash) VALUES
+                                     ('11111111-1111-1111-1111-111111111111', 'system_user', 'password');

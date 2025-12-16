@@ -28,7 +28,7 @@ public class MediaService {
 
         MediaEntry entry = new MediaEntry.Builder()
                 .id(id)
-                .createdBy(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+                .createdBy(UUID.fromString("11111111-1111-1111-1111-111111111111")) //system user
                 .title(input.title())
                 .description(input.description())
                 .releaseYear(input.releaseYear() == null ? 0 : input.releaseYear())

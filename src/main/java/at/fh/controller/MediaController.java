@@ -26,23 +26,54 @@ public class MediaController {
         String method = ex.getRequestMethod();
         String path = ex.getRequestURI().getPath();
 
-        if (path.equals("/api/media/")) {
+        if (path.equals("/api/media") || path.equals("/api/media/")) {
             switch (method) {
                 case "GET" -> sendJson(ex, 200, mediaService.findAll());
                 case "POST" -> createMedia(ex);
                 default -> sendText(ex, 405, "Method Not Allowed");
             }
+            return;
         }
 
         if (path.startsWith("/api/media/")) {
-            UUID mediaId = UUID.fromString(path.substring("/api/media/".length()));
+            String idPart = path.substring("/api/media/".length());
+            if (idPart.isBlank()) {
+                sendText(ex, 400, "Missing media id");
+                return;
+            }
+
+            UUID mediaId;
+            try {
+                mediaId = UUID.fromString(idPart);
+            } catch (IllegalArgumentException e) {
+                sendText(ex, 400, "Invalid UUID");
+                return;
+            }
 
             switch (method) {
-                case "DELETE" -> deleteMedia(ex, mediaId); //204
-                case "GET" -> getMedia(ex, mediaId); //200
-                case "PUT" -> updateMedia(ex, mediaId); //200
+                case "GET" -> getMedia(ex, mediaId);
+                case "DELETE" -> deleteMedia(ex, mediaId);
                 default -> sendText(ex, 405, "Method Not Allowed");
             }
+        }
+    }
+
+    private void createMedia(HttpExchange ex) throws IOException {
+        try {
+            MediaDTO input = mapper.readValue(ex.getRequestBody(), MediaDTO.class);
+
+            UUID id = mediaService.create(input);
+            ex.getResponseHeaders().set("Location", "/api/media/" + id);
+
+            sendJson(ex, 201, new java.util.HashMap<>() {{
+                put("id", id.toString());
+                put("message", "Media Created");
+            }});
+
+        } catch (IllegalArgumentException e) {
+            sendText(ex, 400, e.getMessage());
+        } catch (Exception e) {
+            sendText(ex, 500, "Server error");
         }
     }
 
@@ -56,7 +87,6 @@ public class MediaController {
 
         sendJson(ex, 200, opt.get());
     }
-
 
     private void deleteMedia(HttpExchange ex, UUID mediaId) throws IOException {
 
