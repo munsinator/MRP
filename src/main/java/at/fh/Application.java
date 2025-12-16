@@ -18,8 +18,17 @@ public class Application {
     static void main() throws IOException {
 
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-        MediaController mediaController = getMediaController();
+        Connection dbConnection = DatabaseConfig.getConnection();
 
+        UserRepository userRepository = new UserRepository(dbConnection);
+        MediaEntryRepository mediaRepository = new MediaEntryRepository(dbConnection);
+
+        AuthService authService = new AuthService();
+        UserService userService = new UserService(userRepository, authService);
+        MediaService mediaService = new MediaService(mediaRepository);
+
+        UserController userController = new UserController(userService,authService);
+        MediaController mediaController = new MediaController(mediaService, authService);
 
         //Für Testzwecke
         server.createContext("/health", exchange -> {
@@ -29,27 +38,10 @@ public class Application {
             exchange.close();
         });
 
-
-        //server.createContext("/api/users", userController::handle);
+        server.createContext("/api/users", userController::handle);
         server.createContext("/api/media", mediaController::handle);
-
 
         server.start();
         System.out.println("Server running on port 8080...");
-    }
-
-    private static MediaController getMediaController() {
-        Connection dbConnection = DatabaseConfig.getConnection();
-
-        //UserRepository userRepository = new UserRepository();
-        MediaEntryRepository mediaRepository = new MediaEntryRepository(dbConnection);
-
-        //AuthService authService = new AuthService();
-        //UserService userService = new UserService();
-        MediaService mediaService = new MediaService(mediaRepository);
-
-        //UserController userController = new UserController(userService,authService);
-        MediaController mediaController = new MediaController(mediaService);
-        return mediaController;
     }
 }

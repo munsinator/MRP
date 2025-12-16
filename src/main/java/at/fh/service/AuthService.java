@@ -15,13 +15,8 @@ public class AuthService {
         return token;
     }
 
-    public UUID authenticate(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer "))
-        {
-            return null;
-        }
-
-        String token = authHeader.substring("Bearer ".length()).trim();
+    public UUID authenticate(String token) {
+        if (token == null) return null;
 
         return sessions.get(token);
     }

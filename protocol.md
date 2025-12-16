@@ -30,12 +30,15 @@ Für die Intermediate Abgabe, habe ich mich dazu entschieden nur die Grundfunkti
 Zusätzlich entschied ich mich dazu, die Datenbank Connection über den Konstruktor zu injizieren, 
 damit vermeide ich mit jedem CRUD Aufruf eine neue Datenbankverbindung aufzubauen.
 
-
 ## Authorization
 Authentifizierung und Autorisierung sind geplant, aber in der Intermediate Version noch nicht implementiert.
 
 ## Controller + Services
-Beide Layer sind noch in der Rohphase. Das HTTP-Routing habe ich der Spezifikation übernommen. Die Responses und Header 
+Beide Layer sind noch in der Rohphase. Zuerst habe ich mich an die Services gesetzt. Beim UserController XXX und
+MediaController XX. Created Media/USER DTOs as rcords weil die schwieriger zu manipulieren sind durch xx eigenschaft. records sind final, felder sind private& final und gibt keine setter.
+media service passt. ich muss nur controller chreiben verstehen.
+
+Das HTTP-Routing habe ich der Spezifikation übernommen. Die Responses und Header 
 sind noch fast leer, aber das wird für die nächste Abgabe abgeändert. Business logic Implementierung ist für den 
 Service Layer geplant, zwecks Leserlichkeit und das Einhalten des Software-Designprinzips SOLID.
 

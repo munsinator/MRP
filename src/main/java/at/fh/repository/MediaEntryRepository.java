@@ -15,7 +15,7 @@ public class MediaEntryRepository {
         this.conn = conn;
     }
 
-    public void save(MediaEntry entry) {
+    public boolean save(MediaEntry entry) {
         String sql = "INSERT INTO media_entry (id, created_by, title, description, release_year, age_restriction) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -32,7 +32,8 @@ public class MediaEntryRepository {
             ps.setInt(5, entry.getReleaseYear());
             ps.setInt(6, entry.getAgeRestriction());
 
-            ps.executeUpdate();
+            int created = ps.executeUpdate();
+            return created == 1;
 
         } catch (SQLException e) {
             throw new RuntimeException("[Error] saving MediaEntry", e);

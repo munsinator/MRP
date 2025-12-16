@@ -1,12 +1,9 @@
 package at.fh.repository;
 
-import at.fh.config.DatabaseConfig;
+import at.fh.model.MediaEntry;
 import at.fh.model.User;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +17,7 @@ public class UserRepository
         this.conn = conn;
     }
 
-    public void save(User user){
+    public boolean save(User user){
         String sql = "INSERT INTO users (id, username, password_hash, created_at) VALUES (?, ?, ?)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -30,12 +27,31 @@ public class UserRepository
             ps.setString(3, user.getPasswordHash());
             ps.setObject(4, user.getCreatedAt());
 
-            ps.executeUpdate();
+            int created = ps.executeUpdate();
+            return created == 1;
 
         } catch (SQLException e) {
             throw new RuntimeException("[Error] saving User: ", e);
         }
 
+    }
+
+    public Optional<User> findByUsername(String username){
+        String sql = "SELECT id, username, password_hash, created_at FROM users WHERE username = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapToUser(rs));
+                }
+            }
+            return Optional.empty();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("[Error] User findId() failed: ", e);
+        }
     }
 
     public Optional<User> findById(UUID id){
@@ -74,17 +90,34 @@ public class UserRepository
 
     }
 
-    public void delete(UUID id){
+    public boolean delete(UUID id){
         String sql = "DELETE FROM users WHERE id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, id);
-            ps.executeUpdate();
+            int deleted = ps.executeUpdate();
+            return deleted > 0;
 
         } catch (SQLException e) {
             throw new RuntimeException("[Error] User delete() failed: ", e);
         }
 
+    }
+
+    public boolean update(User user) {
+        String sql = "UPDATE users SET username = ?, password_hash = ? WHERE id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getUserName());
+            ps.setString(2, user.getPasswordHash());
+            ps.setObject(4, user.getId());
+
+            int updated = ps.executeUpdate();
+            return updated > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("[Error] User update failed", e);
+        }
     }
 
     private User mapToUser(ResultSet rs) throws SQLException {
