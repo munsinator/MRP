@@ -1,54 +1,48 @@
 # Development Protocol
-
-Add a protocol document with the following content:
-- Description of technical steps and architecture decisions
-- Explanation of unit test coverage and why specific logic was tested
-- Notes on problems encountered and how they were solved
-- Estimated time tracking for each major part of the project
-- consider that the git-history is part of the documentation (no need to copy it into the
-protocol)
-  
-See the corresponding Checklist Excel sheets for the MUST-HAVES, Grading-Items and
-  Grading-Points.
----
-
 ## Database Design + Docker
-hand drawn, how done, docker compose and multiple redesigns -> join tables
+Ich habe ein simples ERD auf Papier gezeichnet und habe es von meinem Prof prüfen lassen. Es sah ungefähr so aus:
+
+ ![ ](./erd.drawio.png)
+
+Ich hatte Filme, Spiele und Serien als separate Tabellen mit Vererbung modelliert.
+Um die Komplexität zu reduzieren und die Persistenzlogik zu vereinfachen, habe ich das Design
+zu einer einzigen media_entry-Tabelle mit einer media_type-Spalte und einer Enumeration im Code geändert.
+Dies erfüllt weiterhin die Anforderungen und hält gleichzeitig die Implementierung wartbar. Danach sah meine Datenbank so aus:
+
+![ ](./mrp.drawio.png)
+
+Note: JOIN-Tabellen habe ich aktuell nicht grafisch dargestellt.
+
 
 ## Models
-..schreiben und @JsonProperty("username"); ich verwende dto=model, in prod eine katastrophe aber für ein proekt dieser größe ok
-aufpassen dass jackson (mein serialization libray) das auch checkt welcher eintrag welche spalte ist
-builder pattern implementiert bis auf genre; genre auf builder wäre mir zuviel und ergo nicht so leserlich
-Initially, I modeled movies, games and series as separate tables with inheritance-like structure.
-To reduce complexity and simplify persistence logic with plain JDBC, I refactored the design to a single media_entry table with a media_type column and an enum in code. This still fulfills the requirements while keeping the implementation maintainable
+Ich habe für jede Entity das Bilder Pattern implementiert, da durch das Pattern eine strikte Vorgabe beim Kreieren befolgt werden muss.
+Die Chancen sind so geringer, dass "Müll Objekte" in der Datenbank landen. Beim Erstellen, der Entities musste ich aufpassen, dass die 
+Attributnamen auch mit Spaltennamen  kompatibel sind. Ich will somit Probleme bei der Serialisierung (Jackson) vermeiden.
 
 
 ## Repositories
-
-
-## Services
-
-
-## Controller
-
+Für die Intermediate Abgabe, habe ich mich dazu entschieden nur die Grundfunktionen (CRUD) zu erstellen:
+- save() (CREATE)
+- findId() (READ)
+- findAll() (READ)
+- update() (UPDATE)
+- delete() (DELETE)
+Zusätzlich entschied ich mich dazu, die Datenbank Connection über den Konstruktor zu injizieren, 
+damit vermeide ich mit jedem CRUD Aufruf eine neue Datenbankverbindung aufzubauen.
 
 
 ## Authorization
-
-
+Authentifizierung und Autorisierung sind geplant, aber in der Intermediate Version noch nicht implementiert.
 
 ---
-## Problems
-
-## Unit test coverage
 
 ## Estimated times
 This is the time it roughly took for each part:
 - Database modelling + Implementation: 2h
-- Repository implementation:
-- Service implementation:
-- Controller implementation:
-- Token-based authorization: 
+- Repository implementation: ~1h
+- Service implementation: ~1h
+- Controller implementation: ~1.5h
+- Token-based authorization: ~Xh
 - Unit test planning + implementation:
-- Documentation:
+- Documentation: ~30min
 - **Honorable mention** - Debugging:
