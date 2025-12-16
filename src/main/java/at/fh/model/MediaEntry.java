@@ -19,6 +19,43 @@ public class MediaEntry {
 
     private MediaEntry() {}
 
+    public UUID getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getReleaseYear() {
+        return releaseYear;
+    }
+
+    public int getAgeRestriction() {
+        return ageRestriction;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public MediaType getMediaType() {
+        return mediaType;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public UUID getCreatedBy() {
+        return createdBy;
+    }
+
+
     public static class Builder {
         private final MediaEntry mediaEntry = new MediaEntry();
 
@@ -52,6 +89,10 @@ public class MediaEntry {
         }
         public Builder createdAt(LocalDateTime createdAt) {
             mediaEntry.createdAt = createdAt;
+            return this;
+        }
+        public Builder createdBy(UUID userId) {
+            mediaEntry.createdBy = userId;
             return this;
         }
         public MediaEntry build() {

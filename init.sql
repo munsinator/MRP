@@ -28,21 +28,6 @@ CREATE TABLE media_genre (
     FOREIGN KEY (genre_id) REFERENCES genre(id) ON DELETE CASCADE
 );
 
-CREATE TABLE movie (
-    id UUID PRIMARY KEY,
-    FOREIGN KEY (id) REFERENCES media_entry(id) ON DELETE CASCADE
-);
-
-CREATE TABLE game (
-    id UUID PRIMARY KEY,
-    FOREIGN KEY (id) REFERENCES media_entry(id) ON DELETE CASCADE
-);
-
-CREATE TABLE series (
-    id UUID PRIMARY KEY,
-    FOREIGN KEY (id) REFERENCES media_entry(id) ON DELETE CASCADE
-);
-
 CREATE TABLE rating (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_by UUID NOT NULL,

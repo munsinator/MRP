@@ -11,6 +11,22 @@ public class User {
 
     private User(){}
 
+    public UUID getId() {
+        return id;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     public static class Builder {
         private final User user = new User();
 
