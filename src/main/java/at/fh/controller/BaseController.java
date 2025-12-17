@@ -38,9 +38,9 @@ public abstract class BaseController {
 
 
     //JSON einlesen
-    protected <T> T readJson(HttpExchange ex, Class<T> clazz) throws IOException {
+    protected <T> T readJson(HttpExchange ex, Class<T> obj) throws IOException {
         try (var in = ex.getRequestBody()) {
-            return mapper.readValue(in, clazz);
+            return mapper.readValue(in, obj);
         }
     }
 

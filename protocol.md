@@ -21,7 +21,7 @@ Attributnamen auch mit Spaltennamen kompatibel sind. Ich will somit Probleme bei
 
 
 ## Repositories
-Für die Intermediate Abgabe, habe ich mich dazu entschieden nur die Grundfunktionen (CRUD) für MediaEntry zu erstellen:
+Für die Intermediate Abgabe, habe ich mich dazu entschieden zumindest die Grundfunktionen (CRUD) für MediaEntry zu erstellen:
 - save() (CREATE)
 - findId() (READ)
 - findAll() (READ)
@@ -30,17 +30,21 @@ Für die Intermediate Abgabe, habe ich mich dazu entschieden nur die Grundfunkti
 Zusätzlich entschied ich mich dazu, die Datenbank Connection über den Konstruktor zu injizieren, 
 damit vermeide ich mit jedem CRUD Aufruf eine neue Datenbankverbindung aufzubauen.
 
-## Authorization
-Authentifizierung und Autorisierung sind geplant, aber in der Intermediate Version noch nicht implementiert.
-
 ## Controller + Services
-Beide Layer sind noch in der Rohphase. Zuerst habe ich mich an die Services gesetzt. Beim UserController XXX und
-MediaController XX. Created Media/USER DTOs as rcords weil die schwieriger zu manipulieren sind durch xx eigenschaft. records sind final, felder sind private& final und gibt keine setter.
-media service passt. ich muss nur controller chreiben verstehen.
+Beide Layer sind noch in der Rohphase. Zuerst habe ich mich an die Services gesetzt. Beim UserController wars mir
+zuerst wichtig nur register() und login() und beim MediaController CRUD Methoden zu implementieren.
+DTOs habe ich als Records erstellt, weil die schwieriger zu manipulieren sind aufgrund ihrer privat & finalen Feldern.
+Setter gibt es auch nicht. Das HTTP-Routing habe ich der Spezifikation übernommen. Die Responses und Header 
+sind leer gemäß Spezifikation, aber das wird für die nächste Abgabe abgeändert. Business logic Implementierung ist für den 
+Service Layer geplant und muss noch fertig geschrieben werden.
 
-Das HTTP-Routing habe ich der Spezifikation übernommen. Die Responses und Header 
-sind noch fast leer, aber das wird für die nächste Abgabe abgeändert. Business logic Implementierung ist für den 
-Service Layer geplant, zwecks Leserlichkeit und das Einhalten des Software-Designprinzips SOLID.
+Getestet wurde die Applikation mit Postman Requests, wie zb. : POST http://localhost:8080/api/users/login/ 
+```json
+{
+    "username":"system_user",
+    "passwordHash":"password"
+}
+```
 
 ---
 
@@ -48,9 +52,9 @@ Service Layer geplant, zwecks Leserlichkeit und das Einhalten des Software-Desig
 This is the time it roughly took for each part:
 - Database modelling + Implementation: 2h
 - Repository implementation: ~1h
-- Service implementation: ~1h
+- Service implementation: ~3h
 - Controller implementation: ~5h
-- Token-based authorization: ~Xh
+- Token-based authorization: ~2h
 - Unit test planning + implementation:
 - Documentation: ~30min
 - **Honorable mention** - Debugging:
