@@ -2,7 +2,6 @@ package at.fh.service;
 
 import at.fh.dto.UserCredentialsDTO;
 import at.fh.dto.UserDTO;
-import at.fh.model.MediaEntry;
 import at.fh.model.User;
 import at.fh.repository.UserRepository;
 
@@ -24,7 +23,7 @@ public class UserService {
     public void register(UserCredentialsDTO newUser) {
         User user = new User.Builder()
                 .id(UUID.randomUUID())
-                .userName(newUser.userName())
+                .username(newUser.username())
                 .passwordHash(newUser.passwordHash()) // TODO: hashing später!!!
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -34,7 +33,7 @@ public class UserService {
 
     public Optional<String> login(UserCredentialsDTO user) {
         //check user
-        Optional<User> result = userRepository.findByUsername(user.userName());
+        Optional<User> result = userRepository.findByUsername(user.username());
         if (result.isEmpty()){
             return Optional.empty();
         }
@@ -60,8 +59,8 @@ public class UserService {
 
         User updated = new User.Builder()
                 .id(tmpUser.getId())
-                .userName(existingUser.userName() != null ? existingUser.userName() : tmpUser.getUserName())
-                .passwordHash(existingUser.password_hash() != null ? existingUser.password_hash() : tmpUser.getPasswordHash())
+                .username(existingUser.username() != null ? existingUser.username() : tmpUser.getUsername())
+                .passwordHash(existingUser.passwordHash() != null ? existingUser.passwordHash() : tmpUser.getPasswordHash())
                 .createdAt(tmpUser.getCreatedAt())
                 .build();
 

@@ -1,3 +1,3 @@
 package at.fh.dto;
 
-public record UserCredentialsDTO(String userName, String passwordHash) {}
+public record UserCredentialsDTO(String username, String passwordHash) {}

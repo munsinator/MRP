@@ -1,6 +1,5 @@
 package at.fh.repository;
 
-import at.fh.model.MediaEntry;
 import at.fh.model.User;
 
 import java.sql.*;
@@ -23,7 +22,7 @@ public class UserRepository
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setObject(1, user.getId());
-            ps.setString(2, user.getUserName());
+            ps.setString(2, user.getUsername());
             ps.setString(3, user.getPasswordHash());
             ps.setObject(4, user.getCreatedAt());
 
@@ -108,7 +107,7 @@ public class UserRepository
         String sql = "UPDATE users SET username = ?, password_hash = ? WHERE id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, user.getUserName());
+            ps.setString(1, user.getUsername());
             ps.setString(2, user.getPasswordHash());
             ps.setObject(4, user.getId());
 
@@ -123,7 +122,7 @@ public class UserRepository
     private User mapToUser(ResultSet rs) throws SQLException {
         return new User.Builder()
                 .id((UUID) rs.getObject("id"))
-                .userName(rs.getString("username"))
+                .username(rs.getString("username"))
                 .passwordHash(rs.getString("password_hash"))
                 .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
                 .build();

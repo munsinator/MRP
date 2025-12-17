@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class User {
     private UUID id;
-    private String userName;
+    private String username;
     private String passwordHash;
     private LocalDateTime createdAt;
 
@@ -15,8 +15,8 @@ public class User {
         return id;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
     public String getPasswordHash() {
@@ -35,8 +35,8 @@ public class User {
             return this;
         }
 
-        public Builder userName(String userName) {
-            user.userName = userName;
+        public Builder username(String username) {
+            user.username = username;
             return this;
         }
 
