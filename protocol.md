@@ -12,7 +12,24 @@ Dies erfüllt weiterhin die Anforderungen und hält gleichzeitig die Implementie
 ![ ](./mrp.drawio.png)
 
 Note: JOIN-Tabellen habe ich aktuell nicht grafisch dargestellt.
+1.1:Best DB design for your current schema
+1) email → column on users
 
+Email is a 1:1 attribute of a user. Add it to users.
+
+Good practice:
+
+allow NULL (because it’s not required by the schema)
+
+optionally enforce uniqueness if your app wants “one email per account”
+
+optionally basic format check (optional)
+
+UND: ALTER TABLE users
+ADD COLUMN favorite_genre_id UUID REFERENCES genre(id);
+
+ALTER TABLE users
+ADD COLUMN email VARCHAR(255); //unique nicht nötig, weil wir es für den login nicht brauchen
 
 ## Models
 Ich habe für jede Entity das Bilder Pattern implementiert, da durch das Pattern eine strikte Vorgabe beim Kreieren befolgt werden muss.

@@ -1,6 +1,6 @@
 package at.fh.controller;
 
-import at.fh.dto.UserCredentialsDTO;
+import at.fh.dto.UserCredentials;
 import at.fh.service.AuthService;
 import at.fh.service.UserService;
 import com.sun.net.httpserver.HttpExchange;
@@ -18,6 +18,7 @@ public class UserController extends BaseController implements HttpHandler {
         this.userService = userService;
         this.authService = authService;
     }
+
     // ROUTING
     @Override
     public void handle(HttpExchange ex) throws IOException {
@@ -53,7 +54,7 @@ public class UserController extends BaseController implements HttpHandler {
     }
 
     public void registerUser(HttpExchange ex) throws IOException {
-        UserCredentialsDTO req = readJson(ex, UserCredentialsDTO.class);
+        UserCredentials req = readJson(ex, UserCredentials.class);
         userService.register(req);
 
         ex.sendResponseHeaders(201, -1);
@@ -61,7 +62,7 @@ public class UserController extends BaseController implements HttpHandler {
     }
 
     public void loginUser(HttpExchange ex) throws IOException {
-        UserCredentialsDTO req = readJson(ex, UserCredentialsDTO.class);
+        UserCredentials req = readJson(ex, UserCredentials.class);
         Optional<String> token = userService.login(req);
 
         if (token.isEmpty()) {

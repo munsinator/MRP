@@ -1,7 +1,6 @@
 package at.fh.service;
 
-import at.fh.dto.UserCredentialsDTO;
-import at.fh.dto.UserDTO;
+import at.fh.dto.UserCredentials;
 import at.fh.model.User;
 import at.fh.repository.UserRepository;
 
@@ -20,7 +19,7 @@ public class UserService {
     }
 
     //create user
-    public void register(UserCredentialsDTO newUser) {
+    public void register(UserCredentials newUser) {
         User user = new User.Builder()
                 .id(UUID.randomUUID())
                 .username(newUser.username())
@@ -31,7 +30,8 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public Optional<String> login(UserCredentialsDTO user) {
+    //Returns token if login successful
+    public Optional<String> login(UserCredentials user) {
         //check user
         Optional<User> result = userRepository.findByUsername(user.username());
         if (result.isEmpty()){
@@ -49,8 +49,8 @@ public class UserService {
         return Optional.of(token);
     }
 
-    public boolean updateUser(UserDTO existingUser) {
-        Optional<User> result = userRepository.findById(existingUser.id());
+    public boolean updateUser(UserCredentials existingUser) {
+        Optional<User> result = userRepository.findByUsername(existingUser.username());
 
         if (result.isEmpty())
             return false;
@@ -59,8 +59,8 @@ public class UserService {
 
         User updated = new User.Builder()
                 .id(tmpUser.getId())
-                .username(existingUser.username() != null ? existingUser.username() : tmpUser.getUsername())
-                .passwordHash(existingUser.passwordHash() != null ? existingUser.passwordHash() : tmpUser.getPasswordHash())
+                .username(tmpUser.getUsername())
+                .passwordHash(tmpUser.getPasswordHash())
                 .createdAt(tmpUser.getCreatedAt())
                 .build();
 
