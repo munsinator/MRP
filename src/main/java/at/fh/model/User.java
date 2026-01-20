@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public class User {
     private UUID id;
+    private String email;
     private String username;
     private String passwordHash;
     private LocalDateTime createdAt;
@@ -13,6 +14,10 @@ public class User {
 
     public UUID getId() {
         return id;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public String getUsername() {
@@ -35,6 +40,11 @@ public class User {
             return this;
         }
 
+        public Builder email(String email) {
+            user.email = email;
+            return this;
+        }
+
         public Builder username(String username) {
             user.username = username;
             return this;
@@ -53,6 +63,10 @@ public class User {
         public User build() {
             if (user.createdAt == null) {
                 user.createdAt = LocalDateTime.now();
+            }
+
+            if (user.email == null && user.username != null) {
+                user.email = user.username + "@mrp.at";
             }
             return user;
         }

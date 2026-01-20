@@ -1,12 +1,12 @@
 package at.fh.repository;
 
+import at.fh.model.Genre;
 import at.fh.model.MediaEntry;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-//Genre habe noch nicht implemtiert
 public class MediaEntryRepository {
 
     private final Connection conn;
@@ -16,27 +16,58 @@ public class MediaEntryRepository {
     }
 
     public boolean save(MediaEntry entry) {
-        String sql = "INSERT INTO media_entry (id, created_by, title, description, release_year, age_restriction) VALUES (?, ?, ?, ?, ?, ?)";
+        String mediaSql = "INSERT INTO media_entry (id, created_by, title, description, release_year, age_restriction, media_type) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String genreSql = "INSERT INTO media_genre (media_id, genre_id) VALUES (?, ?)";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setObject(1, entry.getId());
-            ps.setObject(2, entry.getCreatedBy());
-            ps.setString(3, entry.getTitle());
+        try {
+            conn.setAutoCommit(false);
 
-            if (entry.getDescription() != null) {
-                ps.setString(4, entry.getDescription());
-            } else {
-                ps.setNull(4, Types.VARCHAR);
+            try (PreparedStatement ps = conn.prepareStatement(mediaSql)) {
+                ps.setObject(1, entry.getId());
+                ps.setObject(2, entry.getCreatedBy());
+                ps.setString(3, entry.getTitle());
+
+                if (entry.getDescription() != null) {
+                    ps.setString(4, entry.getDescription());
+                } else {
+                    ps.setNull(4, Types.VARCHAR);
+                }
+
+                ps.setInt(5, entry.getReleaseYear());
+                ps.setInt(6, entry.getAgeRestriction());
+                ps.setObject(7, entry.getMediaType().name());
+
+                int created = ps.executeUpdate();
+                if (created != 1) {
+                    conn.rollback();
+                    return false;
+                }
             }
 
-            ps.setInt(5, entry.getReleaseYear());
-            ps.setInt(6, entry.getAgeRestriction());
+            if (entry.getGenres() != null) {
+                try (PreparedStatement ps = conn.prepareStatement(genreSql)) {
+                    for (Genre genre : entry.getGenres()) {
+                        ps.setObject(1, entry.getId());
+                        ps.setObject(2, genre.getId());
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            }
 
-            int created = ps.executeUpdate();
-            return created == 1;
+            conn.commit();
+            return true;
 
         } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException ignored) {}
             throw new RuntimeException("[Error] saving MediaEntry", e);
+
+        } finally {
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException ignored) {}
         }
     }
 

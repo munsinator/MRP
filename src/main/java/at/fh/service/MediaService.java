@@ -1,17 +1,22 @@
 package at.fh.service;
 import at.fh.dto.MediaInput;
+import at.fh.model.Genre;
 import at.fh.model.MediaEntry;
+import at.fh.repository.GenreRepository;
 import at.fh.repository.MediaEntryRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public class MediaService {
     private final MediaEntryRepository mediaRepository;
+    private final GenreRepository genreRepository;
 
-    public MediaService(MediaEntryRepository mediaRepository) {
+    public MediaService(MediaEntryRepository mediaRepository, GenreRepository genreRepository) {
         this.mediaRepository = mediaRepository;
+        this.genreRepository = genreRepository;
     }
 
     public List<MediaEntry> findAll() {
@@ -19,11 +24,47 @@ public class MediaService {
     }
 
     public Optional<MediaEntry> findById(UUID id) {
-        return mediaRepository.findById(id);
+        Optional<MediaEntry> opt = mediaRepository.findById(id);
+        if (opt.isEmpty()) return Optional.empty();
+
+        MediaEntry base = opt.get();
+        List<Genre> genres = genreRepository.findByMediaId(id);
+
+        MediaEntry full = new MediaEntry.Builder()
+                .id(base.getId())
+                .createdBy(base.getCreatedBy())
+                .title(base.getTitle())
+                .description(base.getDescription())
+                .releaseYear(base.getReleaseYear())
+                .ageRestriction(base.getAgeRestriction())
+                .mediaType(base.getMediaType())
+                .createdAt(base.getCreatedAt())
+                .genres(genres)
+                .build();
+
+        return Optional.of(full);
     }
 
     public boolean create(MediaInput request, UUID userId) {
         UUID mediaId = UUID.randomUUID();
+
+        List<Genre> genreList = new ArrayList<>();
+
+        for (String genreName : request.genres()) {
+            Optional<Genre> existing = genreRepository.findByName(genreName);
+
+            if (existing.isPresent()) {
+                genreList.add(existing.get());
+            } else {
+                Genre newGenre = new Genre.Builder()
+                        .id(UUID.randomUUID())
+                        .name(genreName)
+                        .build();
+
+                genreRepository.save(newGenre);
+                genreList.add(newGenre);
+            }
+        }
 
         MediaEntry entry = new MediaEntry.Builder()
                 .id(mediaId)
@@ -32,6 +73,8 @@ public class MediaService {
                 .description(request.description())
                 .releaseYear(request.releaseYear() == null ? 0 : request.releaseYear())
                 .ageRestriction(request.ageRestriction() == null ? 0 : request.ageRestriction())
+                .genres(genreList)
+                .mediaType(request.mediaType())
                 .build();
 
         return mediaRepository.save(entry);

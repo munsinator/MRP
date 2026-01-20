@@ -1,13 +1,18 @@
 package at.fh.controller;
 
 import at.fh.dto.UserCredentials;
+import at.fh.dto.UserProfileUpdate;
+import at.fh.model.User;
+import at.fh.model.UserProfile;
 import at.fh.service.AuthService;
 import at.fh.service.UserService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class UserController extends BaseController implements HttpHandler {
     private final UserService userService;
@@ -22,11 +27,13 @@ public class UserController extends BaseController implements HttpHandler {
     // ROUTING
     @Override
     public void handle(HttpExchange ex) throws IOException {
-        String path = ex.getRequestURI().getPath();
+        String fullPath = ex.getRequestURI().getPath();
+        String context  = ex.getHttpContext().getPath();
+        String path = fullPath.substring(context.length());
         String method = ex.getRequestMethod();
 
         try {
-            if (path.equals("/api/users/register/") || path.equals("/api/users/register")) {
+            if (path.equals("/register/") || path.equals("/register")) {
                 if (method.equals("POST")) {
                     registerUser(ex);
                     return;
@@ -34,7 +41,7 @@ public class UserController extends BaseController implements HttpHandler {
                 sendText(ex, 405, "Not a valid method");
                 return;
 
-            } else if (path.equals("/api/users/login/") || path.equals("/api/users/login")) {
+            } else if (path.equals("/login/") || path.equals("/login")) {
                 if (method.equals("POST")) {
                     loginUser(ex);
                     return;
@@ -42,8 +49,21 @@ public class UserController extends BaseController implements HttpHandler {
                 sendText(ex, 405, "Not a valid method");
                 return;
 
+            } else if (path.matches("^/[^/]+/profile/?$")) {
+                if (method.equals("GET")) {
+                    getProfile(ex);
+                    return;
+                }
+
+                if (method.equals("PUT")) {
+                    updateProfile(ex);
+                    return;
+                }
+                sendText(ex, 405, "Not a valid method");
+                return;
+
             } else {
-                sendText(ex, 404, "Not found");
+                sendText(ex, 404, "Endpoint not found");
                 return;
             }
 
@@ -52,6 +72,8 @@ public class UserController extends BaseController implements HttpHandler {
             return;
         }
     }
+
+    //TODO: USER RATING FERTIG MACHEN
 
     public void registerUser(HttpExchange ex) throws IOException {
         UserCredentials req = readJson(ex, UserCredentials.class);
@@ -70,8 +92,40 @@ public class UserController extends BaseController implements HttpHandler {
             return;
         }
 
-        ex.getResponseHeaders().set("X-Auth-Token", token.get());
-        ex.sendResponseHeaders(200, -1);
-        ex.close();
+        sendJson(ex, 200, Map.of("token", token.get()));
+    }
+
+    public void getProfile(HttpExchange ex) throws IOException {
+        UUID loggedInUserId = authorizeUser(ex);
+        if (loggedInUserId == null) return;
+
+        UUID requestedUserId = extractUuid(ex);
+        if (requestedUserId == null) return;
+
+        if (!requestedUserId.equals(loggedInUserId)) {
+            sendText(ex, 403, "Forbidden Access");
+            return;
+        }
+
+        Optional<User> profile = userService.getUserById(requestedUserId);
+        sendJson(ex, 200, profile);
+    }
+
+    public void updateProfile(HttpExchange ex) throws IOException {
+        UUID loggedInUserId = authorizeUser(ex);
+        if (loggedInUserId == null) return;
+
+        UserProfileUpdate req = readJson(ex, UserProfileUpdate.class);
+
+        boolean result = userService.updateUser(req, loggedInUserId);
+
+        if (!result) {
+            sendText(ex, 404, "User not found");
+            return;
+        }
+
+        sendText(ex, 200, "Profile updated");
     }
 }
+
+//TODO: AT LEAST 20 UNIT TESTS

@@ -54,11 +54,24 @@ public abstract class BaseController {
     }
 
     //Server Response as JSON
-    private void sendJson(HttpExchange ex, int code, Object message) throws IOException {
+    protected void sendJson(HttpExchange ex, int code, Object message) throws IOException {
         byte[] bytes = mapper.writeValueAsBytes(message);
-        ex.getResponseHeaders().set("Content-Type", "application/son; charset=utf-8");
+        ex.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
         ex.sendResponseHeaders(code, bytes.length);
         ex.getResponseBody().write(bytes);
         ex.close();
     }
+
+    //Extract UUID such as userId, mediaId etc. HELPER
+    protected UUID extractUuid(HttpExchange ex) throws IOException {
+        String[] parts = ex.getRequestURI().getPath().split("/");
+
+        try {
+            return UUID.fromString(parts[3]);
+        } catch (IllegalArgumentException e) {
+            sendText(ex, 400, "Error while accessing endpoint: Invalid UUID");
+            return null;
+        }
+    }
+
 }

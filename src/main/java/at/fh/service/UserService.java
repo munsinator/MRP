@@ -1,6 +1,7 @@
 package at.fh.service;
 
 import at.fh.dto.UserCredentials;
+import at.fh.dto.UserProfileUpdate;
 import at.fh.model.User;
 import at.fh.repository.UserRepository;
 
@@ -23,9 +24,8 @@ public class UserService {
         User user = new User.Builder()
                 .id(UUID.randomUUID())
                 .username(newUser.username())
-                .passwordHash(newUser.passwordHash()) // TODO: hashing später!!!
-                .createdAt(LocalDateTime.now())
-                .build();
+                .passwordHash(newUser.passwordHash())
+                .build(); // TODO: hashing später!!!
 
         userRepository.save(user);
     }
@@ -49,8 +49,8 @@ public class UserService {
         return Optional.of(token);
     }
 
-    public boolean updateUser(UserCredentials existingUser) {
-        Optional<User> result = userRepository.findByUsername(existingUser.username());
+    public boolean updateUser(UserProfileUpdate existingUser, UUID userId) {
+        Optional<User> result = userRepository.findById(userId);
 
         if (result.isEmpty())
             return false;
@@ -59,6 +59,7 @@ public class UserService {
 
         User updated = new User.Builder()
                 .id(tmpUser.getId())
+                .email(existingUser.email())
                 .username(tmpUser.getUsername())
                 .passwordHash(tmpUser.getPasswordHash())
                 .createdAt(tmpUser.getCreatedAt())

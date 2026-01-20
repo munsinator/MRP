@@ -8,6 +8,14 @@ public class Genre {
 
     private Genre() {}
 
+    public UUID getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     public static class Builder{
         private final Genre genre = new Genre();
 

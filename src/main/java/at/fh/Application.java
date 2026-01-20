@@ -3,6 +3,7 @@ package at.fh;
 import at.fh.config.DatabaseConfig;
 import at.fh.controller.MediaController;
 import at.fh.controller.UserController;
+import at.fh.repository.GenreRepository;
 import at.fh.repository.MediaEntryRepository;
 import at.fh.repository.UserRepository;
 import at.fh.service.AuthService;
@@ -22,10 +23,11 @@ public class Application {
 
         UserRepository userRepository = new UserRepository(dbConnection);
         MediaEntryRepository mediaRepository = new MediaEntryRepository(dbConnection);
+        GenreRepository genreRepository = new GenreRepository(dbConnection);
 
         AuthService authService = new AuthService();
         UserService userService = new UserService(userRepository, authService);
-        MediaService mediaService = new MediaService(mediaRepository);
+        MediaService mediaService = new MediaService(mediaRepository,  genreRepository);
 
         UserController userController = new UserController(userService,authService);
         MediaController mediaController = new MediaController(mediaService, authService);

@@ -17,14 +17,15 @@ public class UserRepository
     }
 
     public boolean save(User user){
-        String sql = "INSERT INTO users (id, username, password_hash, created_at) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO users (id, email, username, password_hash, created_at) VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setObject(1, user.getId());
-            ps.setString(2, user.getUsername());
-            ps.setString(3, user.getPasswordHash());
-            ps.setObject(4, user.getCreatedAt());
+            ps.setObject(2, user.getEmail());
+            ps.setString(3, user.getUsername());
+            ps.setString(4, user.getPasswordHash());
+            ps.setObject(5, user.getCreatedAt());
 
             int created = ps.executeUpdate();
             return created == 1;

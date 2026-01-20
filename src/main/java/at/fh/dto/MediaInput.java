@@ -10,6 +10,6 @@ public record MediaInput(
         String description,
         Integer releaseYear,
         Integer ageRestriction,
-        List<Genre> genres,
+        List<String> genres,
         MediaType mediaType
 ){}
