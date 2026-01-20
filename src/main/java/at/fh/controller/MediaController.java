@@ -1,9 +1,11 @@
 package at.fh.controller;
 
 import at.fh.dto.MediaInput;
+import at.fh.dto.RatingInput;
 import at.fh.model.MediaEntry;
 import at.fh.service.AuthService;
 import at.fh.service.MediaService;
+import at.fh.service.RatingService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -14,12 +16,12 @@ import java.util.UUID;
 
 public class MediaController extends BaseController implements HttpHandler {
     private final MediaService mediaService;
-    private final AuthService authService;
+    private final RatingService ratingService;
 
-    public MediaController(MediaService mediaService, AuthService authService) {
+    public MediaController(MediaService mediaService, RatingService ratingService, AuthService authService) {
         super(authService);
         this.mediaService = mediaService;
-        this.authService = authService;
+        this.ratingService = ratingService;
     }
 
     // ROUTING
@@ -43,7 +45,7 @@ public class MediaController extends BaseController implements HttpHandler {
                         sendText(ex, 405, "Not a valid method");
                         return;
                 }
-            } else if ((path.matches("^/[^/]+$"))) {
+            } else if ((path.matches("^/[^/]+$"))) { //TODO: Regex bearbeiten!
                 switch (method) {
                     case "GET":
                         findMediaById(ex);
@@ -57,8 +59,24 @@ public class MediaController extends BaseController implements HttpHandler {
                     default:
                         sendText(ex, 405, "Not a valid method");
                 }
-                } else if (path.matches("^/[^/]+/rate/?$")) {
-                    //TODO: FERTIG MACHEN
+            } else if (path.matches("^/[^/]+/rate/?$")) {
+                if (method.equals("POST")) {
+                    rateMedia(ex);
+                    return;
+                }
+                sendText(ex, 405, "Not a valid method");
+                return;
+            } else if (path.matches("^/[^/]+/favorite/?$")) {
+                switch (method) {
+                    case "POST":
+                        markAsFavorite(ex);
+                        return;
+                    case "DELETE":
+                        unmarkAsFavorite(ex);
+                        return;
+                    default:
+                        sendText(ex, 405, "Not a valid method");
+                }
             } else {
                 sendText(ex, 404, "Endpoint not found");
                 return;
@@ -68,7 +86,7 @@ public class MediaController extends BaseController implements HttpHandler {
             return;
         }
 
-    } //TODO: MEDIARATING FERTIG MACHEN
+    }
 
     private void findAllMedia(HttpExchange ex) throws IOException {
         UUID loggedInUserId = authorizeUser(ex);
@@ -148,5 +166,51 @@ public class MediaController extends BaseController implements HttpHandler {
 
         ex.sendResponseHeaders(204, -1);
         ex.close();
+    }
+
+    private void rateMedia(HttpExchange ex) throws IOException {
+        UUID userId = authorizeUser(ex);
+        if (userId == null) return;
+
+        UUID mediaId = extractUuid(ex);
+        RatingInput req = readJson(ex, RatingInput.class);
+        boolean success = ratingService.createRating(req, mediaId, userId);
+
+        if (!success) {
+            sendText(ex, 404, "Rating failed");
+            return;
+        }
+
+        sendText(ex, 201, "Rating submitted");
+    }
+
+    private void markAsFavorite(HttpExchange ex) throws IOException {
+        UUID userId = authorizeUser(ex);
+        if (userId == null) return;
+
+        UUID mediaId = extractUuid(ex);
+        boolean success = mediaService.likeMedia(mediaId, userId);
+
+        if (!success) {
+            sendText(ex, 404, "Liking media failed");
+            return;
+        }
+
+        sendText(ex, 200, "Marked as favorite");
+    }
+
+    private void unmarkAsFavorite(HttpExchange ex) throws IOException {
+        UUID userId = authorizeUser(ex);
+        if (userId == null) return;
+
+        UUID mediaId = extractUuid(ex);
+        boolean success = mediaService.unlikeMedia(mediaId, userId);
+
+        if (!success) {
+            sendText(ex, 404, "Liking media failed");
+            return;
+        }
+
+        sendText(ex, 204, "Unmarked");
     }
 }

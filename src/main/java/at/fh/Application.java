@@ -2,12 +2,15 @@ package at.fh;
 
 import at.fh.config.DatabaseConfig;
 import at.fh.controller.MediaController;
+import at.fh.controller.RatingController;
 import at.fh.controller.UserController;
 import at.fh.repository.GenreRepository;
 import at.fh.repository.MediaEntryRepository;
+import at.fh.repository.RatingRepository;
 import at.fh.repository.UserRepository;
 import at.fh.service.AuthService;
 import at.fh.service.MediaService;
+import at.fh.service.RatingService;
 import at.fh.service.UserService;
 import com.sun.net.httpserver.HttpServer;
 
@@ -24,13 +27,16 @@ public class Application {
         UserRepository userRepository = new UserRepository(dbConnection);
         MediaEntryRepository mediaRepository = new MediaEntryRepository(dbConnection);
         GenreRepository genreRepository = new GenreRepository(dbConnection);
+        RatingRepository  ratingRepository = new RatingRepository(dbConnection);
 
         AuthService authService = new AuthService();
         UserService userService = new UserService(userRepository, authService);
         MediaService mediaService = new MediaService(mediaRepository,  genreRepository);
+        RatingService ratingService = new RatingService(userRepository, ratingRepository, authService);
 
-        UserController userController = new UserController(userService,authService);
+        UserController userController = new UserController(userService,authService, ratingService, mediaService);
         MediaController mediaController = new MediaController(mediaService, authService);
+        RatingController ratingController = new RatingController(ratingService, authService);
 
         //Für Testzwecke
         server.createContext("/health", exchange -> {
@@ -42,6 +48,7 @@ public class Application {
 
         server.createContext("/api/users", userController::handle);
         server.createContext("/api/media", mediaController::handle);
+        server.createContext("/api/ratings", ratingController::handle);
 
         server.start();
         System.out.println("Server running on port 8080...");

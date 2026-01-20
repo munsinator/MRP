@@ -144,6 +144,27 @@ public class MediaEntryRepository {
         }
     }
 
+    public List<MediaEntry> getFavoriteMediaFrom(UUID userId){
+        String sql = "SELECT m.id, m.title, m.description, m.release_year, m.age_restriction, m.created_at, m.created_by FROM media_entry m JOIN media_favorite mf ON mf.media_id = m.id WHERE mf.user_id = ? ORDER BY m.created_at DESC ";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                List<MediaEntry> mediaEntries = new ArrayList<>();
+
+                while (rs.next()) {
+                    mediaEntries.add(mapToMediaEntry(rs));
+                }
+
+                return mediaEntries;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("[Error] loading favorite media for user", e);
+        }
+    }
+
     private MediaEntry mapToMediaEntry(ResultSet rs) throws SQLException {
         Timestamp ts = rs.getTimestamp("created_at");
         LocalDateTime createdAt = (ts != null) ? ts.toLocalDateTime() : null;

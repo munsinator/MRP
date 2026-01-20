@@ -2,26 +2,33 @@ package at.fh.controller;
 
 import at.fh.dto.UserCredentials;
 import at.fh.dto.UserProfileUpdate;
+import at.fh.model.MediaEntry;
+import at.fh.model.Rating;
 import at.fh.model.User;
 import at.fh.model.UserProfile;
 import at.fh.service.AuthService;
+import at.fh.service.MediaService;
+import at.fh.service.RatingService;
 import at.fh.service.UserService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 public class UserController extends BaseController implements HttpHandler {
     private final UserService userService;
-    private final AuthService authService;
+    private final RatingService ratingService;
+    private final MediaService mediaService;
 
-    public UserController(UserService userService, AuthService authService) {
+    public UserController(UserService userService, AuthService authService, RatingService ratingService, MediaService mediaService) {
         super(authService);
         this.userService = userService;
-        this.authService = authService;
+        this.ratingService = ratingService;
+        this.mediaService = mediaService;
     }
 
     // ROUTING
@@ -62,6 +69,22 @@ public class UserController extends BaseController implements HttpHandler {
                 sendText(ex, 405, "Not a valid method");
                 return;
 
+            } else if (path.matches("^/[^/]+/ratings/?$")) {
+                if (method.equals("GET")) {
+                    getRatingHistory(ex);
+                    return;
+                }
+                sendText(ex, 405, "Not a valid method");
+                return;
+
+            } else if (path.matches("^/[^/]+/favorites/?$")) {
+                if (method.equals("GET")) {
+                    getFavoriteMedia(ex);
+                    return;
+                }
+                sendText(ex, 405, "Not a valid method");
+                return;
+
             } else {
                 sendText(ex, 404, "Endpoint not found");
                 return;
@@ -73,9 +96,7 @@ public class UserController extends BaseController implements HttpHandler {
         }
     }
 
-    //TODO: USER RATING FERTIG MACHEN
-
-    public void registerUser(HttpExchange ex) throws IOException {
+    private void registerUser(HttpExchange ex) throws IOException {
         UserCredentials req = readJson(ex, UserCredentials.class);
         userService.register(req);
 
@@ -83,7 +104,7 @@ public class UserController extends BaseController implements HttpHandler {
         ex.close();
     }
 
-    public void loginUser(HttpExchange ex) throws IOException {
+    private void loginUser(HttpExchange ex) throws IOException {
         UserCredentials req = readJson(ex, UserCredentials.class);
         Optional<String> token = userService.login(req);
 
@@ -95,7 +116,7 @@ public class UserController extends BaseController implements HttpHandler {
         sendJson(ex, 200, Map.of("token", token.get()));
     }
 
-    public void getProfile(HttpExchange ex) throws IOException {
+    private void getProfile(HttpExchange ex) throws IOException {
         UUID loggedInUserId = authorizeUser(ex);
         if (loggedInUserId == null) return;
 
@@ -111,7 +132,7 @@ public class UserController extends BaseController implements HttpHandler {
         sendJson(ex, 200, profile);
     }
 
-    public void updateProfile(HttpExchange ex) throws IOException {
+    private void updateProfile(HttpExchange ex) throws IOException {
         UUID loggedInUserId = authorizeUser(ex);
         if (loggedInUserId == null) return;
 
@@ -126,6 +147,36 @@ public class UserController extends BaseController implements HttpHandler {
 
         sendText(ex, 200, "Profile updated");
     }
-}
 
-//TODO: AT LEAST 20 UNIT TESTS
+    private void getRatingHistory(HttpExchange ex) throws IOException {
+        UUID loggedInUserId = authorizeUser(ex);
+        if (loggedInUserId == null) return;
+
+        UUID requestedUserId = extractUuid(ex);
+        if (requestedUserId == null) return;
+
+        if (!requestedUserId.equals(loggedInUserId)) {
+            sendText(ex, 403, "Forbidden Access");
+            return;
+        }
+
+        List<Rating> ratingHistory = ratingService.getRatingHistoryOfUser(requestedUserId);
+        sendJson(ex, 200, ratingHistory);
+    }
+
+    private void getFavoriteMedia(HttpExchange ex) throws IOException {
+        UUID loggedInUserId = authorizeUser(ex);
+        if (loggedInUserId == null) return;
+
+        UUID requestedUserId = extractUuid(ex);
+        if (requestedUserId == null) return;
+
+        if (!requestedUserId.equals(loggedInUserId)) {
+            sendText(ex, 403, "Forbidden Access");
+            return;
+        }
+
+        List<MediaEntry> favorites = mediaService.getFavoriteMediaFrom(requestedUserId);
+        sendJson(ex, 200, favorites);
+    }
+}

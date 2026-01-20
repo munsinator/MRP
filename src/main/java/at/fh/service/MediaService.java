@@ -102,4 +102,16 @@ public class MediaService {
     public boolean delete(UUID id) {
         return mediaRepository.delete(id);
     }
+
+    public List<MediaEntry> getFavoriteMediaFrom(UUID userId) {
+        return mediaRepository.getFavoriteMediaFrom(userId);
+    }
+
+    public boolean likeMedia(UUID mediaId, UUID userId){
+
+    }
+
+    public boolean unlikeMedia(UUID mediaId, UUID userId){
+
+    }
 }

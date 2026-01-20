@@ -15,6 +15,38 @@ public class Rating {
 
     private Rating() {}
 
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getCreatedBy() {
+        return createdBy;
+    }
+
+    public UUID getMediaId() {
+        return mediaId;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public int getStars() {
+        return stars;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
     public static class Builder {
         private final Rating rating = new Rating();
 
@@ -59,6 +91,14 @@ public class Rating {
         }
 
         public Rating build() {
+            if (rating.createdAt == null) {
+                rating.createdAt = LocalDateTime.now();
+            }
+
+            if (rating.updatedAt == null) {
+                rating.updatedAt = LocalDateTime.now();
+            }
+
             return rating;
         }
     }

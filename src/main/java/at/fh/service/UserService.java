@@ -2,6 +2,7 @@ package at.fh.service;
 
 import at.fh.dto.UserCredentials;
 import at.fh.dto.UserProfileUpdate;
+import at.fh.model.Rating;
 import at.fh.model.User;
 import at.fh.repository.UserRepository;
 
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.RecursiveTask;
 
 public class UserService {
     private final UserRepository userRepository;
@@ -80,4 +82,5 @@ public class UserService {
     public boolean deleteUser(UUID userId) {
        return userRepository.delete(userId);
     }
+
 }
