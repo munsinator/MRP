@@ -49,7 +49,17 @@ Getestet wurde die Applikation mit den gegebenen Postman Requests, wie zb. : POS
 }
 ```
 ## Final Architecture
-![ ](./mrp.drawio.png)
+![ ](./controller.png)
+![ ](./services.png)
+![ ](./dtos.png)
+![ ](./repo.png)
+![ ](./models.png)
+
+
+Wenn Intellij Ultimate verwendet wird, dann mache folgendes um die gesamte Architektur zu sehen:
+- Rechts klick auf den root folder
+- Klick auf "Diagrams"
+- Klick auf "Show Diagram"
 
 ---
 
@@ -59,7 +69,7 @@ Getestet wurde die Applikation mit den gegebenen Postman Requests, wie zb. : POS
 - Service implementation: ~9h
 - Controller implementation: ~16h
 - Token-based authorization: ~2h
-- Unit test planning + implementation: 3h
+- Unit test planning + implementation: 2.5h
 - Documentation: ~5h
 - **Honorable mention** - Debugging: 15h
 
@@ -69,4 +79,5 @@ Getestet wurde die Applikation mit den gegebenen Postman Requests, wie zb. : POS
 - Lieber ein DTO zu viel als zu wenig.
 - Datenbank Design schon vor dem Start der Implementierung fertig haben. In diesem Projekt lief das parallel und das 
 war keine gute Idee.
+- Genug Zeit für Unit tests einplanen (!!)
 

@@ -1,16 +1,14 @@
 package at.fh.repository;
 
-import at.fh.constants.MediaType;
 import at.fh.dto.MediaSearchParams;
 import at.fh.model.Genre;
 import at.fh.model.MediaEntry;
 import at.fh.repository.mapper.MediaEntryMapper;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.*;
 
-public class MediaEntryRepository {
+public class MediaEntryRepository{
 
     private final Connection conn;
 

@@ -96,7 +96,7 @@ public class MediaController extends BaseController implements HttpHandler {
 
     }
 
-    private void findAllMedia(HttpExchange ex) throws IOException {
+    protected void findAllMedia(HttpExchange ex) throws IOException {
         UUID loggedInUserId = authorizeUser(ex);
         if (loggedInUserId == null) return;
 
@@ -110,7 +110,7 @@ public class MediaController extends BaseController implements HttpHandler {
         sendJson(ex, 200, result);
     }
 
-    private void createMedia(HttpExchange ex) throws IOException {
+    protected void createMedia(HttpExchange ex) throws IOException {
         UUID userId = authorizeUser(ex);
         if (userId == null) return;
 
@@ -126,7 +126,7 @@ public class MediaController extends BaseController implements HttpHandler {
         sendText(ex, 201, "Media created");
     }
 
-    private void findMediaById(HttpExchange ex) throws IOException {
+    protected void findMediaById(HttpExchange ex) throws IOException {
         UUID userId = authorizeUser(ex);
         if (userId == null) return;
 
@@ -140,7 +140,7 @@ public class MediaController extends BaseController implements HttpHandler {
         sendJson(ex, 200, result.get());
     }
 
-    private void updateMedia(HttpExchange ex) throws IOException {
+    protected void updateMedia(HttpExchange ex) throws IOException {
         UUID userId = authorizeUser(ex);
         if (userId == null) return;
 
@@ -158,7 +158,7 @@ public class MediaController extends BaseController implements HttpHandler {
         ex.close();
     }
 
-    private void deleteMedia(HttpExchange ex) throws IOException {
+    protected void deleteMedia(HttpExchange ex) throws IOException {
         UUID userId = authorizeUser(ex);
         if (userId == null) return;
 
@@ -175,7 +175,7 @@ public class MediaController extends BaseController implements HttpHandler {
         ex.close();
     }
 
-    private void rateMedia(HttpExchange ex) throws IOException {
+    protected void rateMedia(HttpExchange ex) throws IOException {
         UUID userId = authorizeUser(ex);
         if (userId == null) return;
 
@@ -191,7 +191,7 @@ public class MediaController extends BaseController implements HttpHandler {
         sendText(ex, 201, "Rating submitted");
     }
 
-    private void markAsFavorite(HttpExchange ex) throws IOException {
+    protected void markAsFavorite(HttpExchange ex) throws IOException {
         UUID userId = authorizeUser(ex);
         if (userId == null) return;
 
@@ -206,7 +206,7 @@ public class MediaController extends BaseController implements HttpHandler {
         sendText(ex, 200, "Marked as favorite");
     }
 
-    private void unmarkAsFavorite(HttpExchange ex) throws IOException {
+    protected void unmarkAsFavorite(HttpExchange ex) throws IOException {
         UUID userId = authorizeUser(ex);
         if (userId == null) return;
 
@@ -222,7 +222,7 @@ public class MediaController extends BaseController implements HttpHandler {
         ex.close();
     }
 
-    private void searchMedia(HttpExchange ex) throws IOException {
+    protected void searchMedia(HttpExchange ex) throws IOException {
         Map<String,String> q = queryParams(ex);
 
         MediaSearchParams p = new MediaSearchParams(

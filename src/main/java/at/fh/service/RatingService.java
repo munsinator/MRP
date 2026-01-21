@@ -1,12 +1,9 @@
 package at.fh.service;
 
 import at.fh.dto.RatingInput;
-import at.fh.model.MediaEntry;
 import at.fh.model.Rating;
 import at.fh.model.User;
-import at.fh.repository.MediaEntryRepository;
 import at.fh.repository.RatingRepository;
-import at.fh.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
