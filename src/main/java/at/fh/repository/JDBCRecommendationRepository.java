@@ -14,7 +14,6 @@ public class JDBCRecommendationRepository implements RecommendationRepository {
         this.conn = conn;
     }
 
-    // ========== TYPE=GENRE (User Genre Pref) ==========
     public List<MediaEntry> recommendByGenre(UUID userId, MediaType mediaType, int limit) {
         String sql = """
             WITH user_genre_pref AS (
@@ -61,7 +60,7 @@ public class JDBCRecommendationRepository implements RecommendationRepository {
         }
     }
 
-    // ========== TYPE=CONTENT (Similar to Top Rated) ==========
+
     public List<MediaEntry> recommendByContentSimilarity(UUID userId, MediaType mediaType, int limit) {
         String sql = """
             WITH top_media AS (
@@ -111,7 +110,7 @@ public class JDBCRecommendationRepository implements RecommendationRepository {
         }
     }
 
-    // ========== FALLBACK (No ratings) ==========
+
     public List<MediaEntry> fallbackTopRated(MediaType mediaType, int limit) {
         String sql = """
             SELECT m.id, m.created_by, m.created_at, m.title, m.description,

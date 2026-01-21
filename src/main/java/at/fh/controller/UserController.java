@@ -58,7 +58,7 @@ public class UserController extends BaseController implements HttpHandler {
 
             } else if (path.matches("^/[^/]+/recommendations/?$")) {
                 if (method.equals("GET")) {
-                    //getRecommendations(ex);
+                    getRecommendations(ex);
                     return;
                 }
 
@@ -105,26 +105,25 @@ public class UserController extends BaseController implements HttpHandler {
         }
     }
 
-    /*private void getRecommendations(HttpExchange ex) throws IOException {
+    private void getRecommendations(HttpExchange ex) throws IOException {
         UUID loggedInUserId = authorizeUser(ex);
         if (loggedInUserId == null) return;
-
         UUID userId = extractUuid(ex);
 
-        String type = getQueryParam(ex, "type");
-        if (type == null || type.isBlank()) type = "genre";
+
+        Map<String, String> params = queryParams(ex);
+        String type = params.getOrDefault("type", "genre").toLowerCase();
 
         if (!type.equals("genre") && !type.equals("content")) {
-            sendText(ex, 400, "Invalid type. Use 'genre' or 'content'.");
+            sendText(ex, 400, "[Error] Invalid type: Use 'genre' or 'content'.");
             return;
         }
-
         MediaType mediaType = MediaType.MOVIE;
 
         List<MediaEntry> recs = recommendationService.getRecommendations(userId, type, mediaType, 5);
         sendJson(ex, 200, recs);
 
-    }*/
+    }
 
     private void registerUser(HttpExchange ex) throws IOException {
         UserCredentials req = readJson(ex, UserCredentials.class);

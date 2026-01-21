@@ -16,16 +16,15 @@ public class RecommendationService {
 
     public List<MediaEntry> getRecommendations(UUID userId, String type, MediaType mediaType, int limit) {
         int ratingCount = repo.countRatingsOfUser(userId);
+
         if (ratingCount == 0) {
             return repo.fallbackTopRated(mediaType, limit);
         }
 
         if ("content".equalsIgnoreCase(type)) {
-            // content similarity (top-3)
             return repo.recommendByContentSimilarity(userId, mediaType, limit);
         }
 
-        // default: genre
         return repo.recommendByGenre(userId, mediaType, limit);
     }
 }

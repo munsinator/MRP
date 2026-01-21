@@ -297,7 +297,7 @@ class MediaServiceTest {
         verify(mediaRepository).getFavoriteMediaFrom(uid);
     }
 
-    // 17) likeMedia delegates
+    // 17) likeMedia
     @Test
     void likeMedia_delegatesToRepo() {
         UUID mid = UUID.randomUUID();
@@ -308,7 +308,7 @@ class MediaServiceTest {
         verify(mediaRepository).favoriteMedia(uid, mid);
     }
 
-    // 18) unlikeMedia delegates
+    // 18) unlikeMedia
     @Test
     void unlikeMedia_delegatesToRepo() {
         UUID mid = UUID.randomUUID();
