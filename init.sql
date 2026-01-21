@@ -57,5 +57,11 @@ CREATE TABLE media_favorite (
     PRIMARY KEY (user_id, media_id)
 );
 
+ALTER TABLE users
+    ADD COLUMN favorite_genre_id UUID REFERENCES genre(id);
+
+ALTER TABLE users
+    ADD COLUMN email VARCHAR(255);
+
 INSERT INTO users (id, username, password_hash) VALUES
                                      ('11111111-1111-1111-1111-111111111111', 'system_user', 'password');

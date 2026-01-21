@@ -32,10 +32,10 @@ public class Application {
         AuthService authService = new AuthService();
         UserService userService = new UserService(userRepository, authService);
         MediaService mediaService = new MediaService(mediaRepository,  genreRepository);
-        RatingService ratingService = new RatingService(userRepository, ratingRepository, authService);
+        RatingService ratingService = new RatingService(ratingRepository);
 
         UserController userController = new UserController(userService,authService, ratingService, mediaService);
-        MediaController mediaController = new MediaController(mediaService, authService);
+        MediaController mediaController = new MediaController(mediaService, ratingService, authService);
         RatingController ratingController = new RatingController(ratingService, authService);
 
         //Für Testzwecke

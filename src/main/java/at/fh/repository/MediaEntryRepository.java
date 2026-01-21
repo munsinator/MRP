@@ -131,6 +131,36 @@ public class MediaEntryRepository {
         }
     }
 
+    public boolean favoriteMedia(UUID mediaId, UUID userId) {
+        String sql = "INSERT INTO media_favorite (user_id, media_id) VALUES (?, ?)";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ps.setObject(2, mediaId);
+
+            int favorited = ps.executeUpdate();
+            return favorited > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("[Error] MediaEntry favorite failed", e);
+        }
+    }
+
+    public boolean unfavoriteMedia(UUID mediaId, UUID userId) {
+        String sql = "DELETE FROM media_favorite WHERE user_id = ? AND  media_id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ps.setObject(2, mediaId);
+
+            int unfavorited = ps.executeUpdate();
+            return unfavorited > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("[Error] MediaEntry unfavorite failed", e);
+        }
+    }
+
     public boolean delete(UUID id) {
         String sql = "DELETE FROM media_entry WHERE id = ?";
 

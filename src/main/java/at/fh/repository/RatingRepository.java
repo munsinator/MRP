@@ -1,5 +1,6 @@
 package at.fh.repository;
 
+import at.fh.dto.RatingInput;
 import at.fh.model.Genre;
 import at.fh.model.Rating;
 import at.fh.model.User;
@@ -45,7 +46,30 @@ public class RatingRepository {
             }
     }
 
-    public Optional<Rating> findRatingById(UUID id) {
+    public boolean update(Rating rating) {
+        String sql = "UPDATE rating SET created_by = ?, media_id = ?, is_public = ?, value = ?, comment = ? WHERE id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, rating.getCreatedBy());
+            ps.setObject(2, rating.getMediaId());
+            ps.setBoolean(3, rating.isPublic());
+            ps.setInt(4, rating.getStars());
+
+            if (rating.getComment() != null) {
+                ps.setString(5, rating.getComment());
+            } else {
+                ps.setNull(5, Types.VARCHAR);
+            }
+
+            int updated = ps.executeUpdate();
+            return updated > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("[Error] Rating update failed", e);
+        }
+    }
+
+    public Optional<Rating> findById(UUID id) {
         String sql = "SELECT id, created_by, media_id, is_public, stars, comment, created_at, updated_at FROM rating WHERE id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -60,7 +84,7 @@ public class RatingRepository {
         }
     }
 
-    public List<Rating> findAllRatings() {
+    public List<Rating> findAll() {
         String sql = "SELECT id, created_by, media_id, is_public, stars, comment, created_at FROM rating  ORDER BY created_at DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -88,7 +112,7 @@ public class RatingRepository {
         }
     }
 
-    public List<Rating> findRatingsByUserId(UUID userId) {
+    public List<Rating> findByUserId(UUID userId) {
         String sql = "SELECT id, created_by, media_id, is_public, stars, comment, created_at FROM rating  WHERE created_by = ?  ORDER BY created_at DESC";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -141,6 +165,21 @@ public class RatingRepository {
             throw new RuntimeException("[Error] finding liked users of rating", e);
         }
     }
+
+    public boolean saveLike(UUID userId, UUID ratingId) {
+        String sql = "INSERT INTO rating_like (user_id, rating_id) VALUES (?, ?)";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ps.setObject(2, ratingId);
+
+            return ps.executeUpdate() == 1;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("[Error] liking rating", e);
+        }
+    }
+
 
     private Rating mapToRating(ResultSet rs) throws SQLException {
         Timestamp createdAtTs = rs.getTimestamp("created_at");

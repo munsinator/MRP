@@ -108,10 +108,10 @@ public class MediaService {
     }
 
     public boolean likeMedia(UUID mediaId, UUID userId){
-
+        return mediaRepository.favoriteMedia(userId, mediaId);
     }
 
     public boolean unlikeMedia(UUID mediaId, UUID userId){
-
+        return mediaRepository.unfavoriteMedia(userId, mediaId);
     }
 }
