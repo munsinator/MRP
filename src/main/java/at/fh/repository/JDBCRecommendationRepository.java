@@ -7,7 +7,7 @@ import at.fh.repository.mapper.MediaEntryMapper;
 import java.sql.*;
 import java.util.*;
 
-public class JDBCRecommendationRepository {
+public class JDBCRecommendationRepository implements RecommendationRepository {
     private final Connection conn;
 
     public JDBCRecommendationRepository(Connection conn) {

@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class JDBCUserRepository
-{
+public class JDBCUserRepository implements UserRepository {
     private final Connection conn;
 
     public JDBCUserRepository(Connection conn) {
@@ -110,7 +109,7 @@ public class JDBCUserRepository
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPasswordHash());
-            ps.setObject(4, user.getId());
+            ps.setObject(3, user.getId());
 
             int updated = ps.executeUpdate();
             return updated > 0;

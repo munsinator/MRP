@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class JDBCLeaderboardRepository {
+public class JDBCLeaderboardRepository implements LeaderboardRepository {
     private final Connection conn;
 
     public JDBCLeaderboardRepository(Connection conn) {
