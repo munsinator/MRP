@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class UserRepository
+public class JDBCUserRepository
 {
     private final Connection conn;
 
-    public UserRepository(Connection conn) {
+    public JDBCUserRepository(Connection conn) {
         this.conn = conn;
     }
 

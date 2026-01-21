@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class LeaderboardRepository {
+public class JDBCLeaderboardRepository {
     private final Connection conn;
 
-    public LeaderboardRepository(Connection conn) {
+    public JDBCLeaderboardRepository(Connection conn) {
         this.conn = conn;
     }
 

@@ -3,23 +3,20 @@ package at.fh.service;
 import at.fh.dto.UserCredentials;
 import at.fh.dto.UserProfileUpdate;
 import at.fh.dto.UserStatistics;
-import at.fh.model.Rating;
 import at.fh.model.User;
-import at.fh.repository.LeaderboardRepository;
-import at.fh.repository.UserRepository;
+import at.fh.repository.JDBCLeaderboardRepository;
+import at.fh.repository.JDBCUserRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.RecursiveTask;
 
 public class UserService {
-    private final UserRepository userRepository;
+    private final JDBCUserRepository userRepository;
     private final AuthService authService;
-    private final LeaderboardRepository leaderboardRepository;
+    private final JDBCLeaderboardRepository leaderboardRepository;
 
-    public UserService(UserRepository userRepo, LeaderboardRepository leaderboardRepo, AuthService authService) {
+    public UserService(JDBCUserRepository userRepo, JDBCLeaderboardRepository leaderboardRepo, AuthService authService) {
         this.userRepository = userRepo;
         this.authService = authService;
         this.leaderboardRepository = leaderboardRepo;

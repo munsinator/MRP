@@ -2,7 +2,7 @@
 
 [Development Protocol](https://github.com/munsinator/MRP/blob/master/protocol.md)
 
-Important: Please pull everything before you start using this project!!
+Important: Please pull everything and build before you start using this project!!
 
 
 Link to repository:

@@ -5,13 +5,12 @@ import at.fh.model.MediaEntry;
 import at.fh.repository.mapper.MediaEntryMapper;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.*;
 
-public class RecommendationRepository {
+public class JDBCRecommendationRepository {
     private final Connection conn;
 
-    public RecommendationRepository(Connection conn) {
+    public JDBCRecommendationRepository(Connection conn) {
         this.conn = conn;
     }
 

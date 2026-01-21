@@ -2,15 +2,15 @@ package at.fh.service;
 
 import at.fh.constants.MediaType;
 import at.fh.model.MediaEntry;
-import at.fh.repository.RecommendationRepository;
+import at.fh.repository.JDBCRecommendationRepository;
 
 import java.util.List;
 import java.util.UUID;
 
 public class RecommendationService {
-    private final RecommendationRepository repo;
+    private final JDBCRecommendationRepository repo;
 
-    public RecommendationService(RecommendationRepository repo) {
+    public RecommendationService(JDBCRecommendationRepository repo) {
         this.repo = repo;
     }
 

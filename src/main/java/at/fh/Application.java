@@ -19,12 +19,12 @@ public class Application {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
         Connection dbConnection = DatabaseConfig.getConnection();
 
-        UserRepository userRepository = new UserRepository(dbConnection);
-        MediaEntryRepository mediaRepository = new MediaEntryRepository(dbConnection);
-        GenreRepository genreRepository = new GenreRepository(dbConnection);
-        RatingRepository  ratingRepository = new RatingRepository(dbConnection);
-        RecommendationRepository recommendationRepository = new RecommendationRepository(dbConnection);
-        LeaderboardRepository leaderboardRepository = new LeaderboardRepository(dbConnection);
+        JDBCUserRepository userRepository = new JDBCUserRepository(dbConnection);
+        JDBCMediaEntryRepository mediaRepository = new JDBCMediaEntryRepository(dbConnection);
+        JDBCGenreRepository genreRepository = new JDBCGenreRepository(dbConnection);
+        JDBCRatingRepository  ratingRepository = new JDBCRatingRepository(dbConnection);
+        JDBCRecommendationRepository recommendationRepository = new JDBCRecommendationRepository(dbConnection);
+        JDBCLeaderboardRepository leaderboardRepository = new JDBCLeaderboardRepository(dbConnection);
 
         AuthService authService = new AuthService();
         UserService userService = new UserService(userRepository, leaderboardRepository, authService);
