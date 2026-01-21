@@ -1,15 +1,13 @@
 package at.fh.controller;
 
+import at.fh.constants.MediaType;
 import at.fh.dto.UserCredentials;
 import at.fh.dto.UserProfileUpdate;
 import at.fh.model.MediaEntry;
 import at.fh.model.Rating;
 import at.fh.model.User;
 import at.fh.model.UserProfile;
-import at.fh.service.AuthService;
-import at.fh.service.MediaService;
-import at.fh.service.RatingService;
-import at.fh.service.UserService;
+import at.fh.service.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -23,12 +21,14 @@ public class UserController extends BaseController implements HttpHandler {
     private final UserService userService;
     private final RatingService ratingService;
     private final MediaService mediaService;
+    private final RecommendationService recommendationService;
 
-    public UserController(UserService userService, AuthService authService, RatingService ratingService, MediaService mediaService) {
+    public UserController(UserService userService, AuthService authService, RatingService ratingService, MediaService mediaService, RecommendationService recommendationService) {
         super(authService);
         this.userService = userService;
         this.ratingService = ratingService;
         this.mediaService = mediaService;
+        this.recommendationService = recommendationService;
     }
 
     // ROUTING
@@ -53,6 +53,15 @@ public class UserController extends BaseController implements HttpHandler {
                     loginUser(ex);
                     return;
                 }
+                sendText(ex, 405, "Not a valid method");
+                return;
+
+            } else if (path.matches("^/[^/]+/recommendations/?$")) {
+                if (method.equals("GET")) {
+                    //getRecommendations(ex);
+                    return;
+                }
+
                 sendText(ex, 405, "Not a valid method");
                 return;
 
@@ -96,6 +105,27 @@ public class UserController extends BaseController implements HttpHandler {
         }
     }
 
+    /*private void getRecommendations(HttpExchange ex) throws IOException {
+        UUID loggedInUserId = authorizeUser(ex);
+        if (loggedInUserId == null) return;
+
+        UUID userId = extractUuid(ex);
+
+        String type = getQueryParam(ex, "type");
+        if (type == null || type.isBlank()) type = "genre";
+
+        if (!type.equals("genre") && !type.equals("content")) {
+            sendText(ex, 400, "Invalid type. Use 'genre' or 'content'.");
+            return;
+        }
+
+        MediaType mediaType = MediaType.MOVIE;
+
+        List<MediaEntry> recs = recommendationService.getRecommendations(userId, type, mediaType, 5);
+        sendJson(ex, 200, recs);
+
+    }*/
+
     private void registerUser(HttpExchange ex) throws IOException {
         UserCredentials req = readJson(ex, UserCredentials.class);
         userService.register(req);
@@ -129,7 +159,11 @@ public class UserController extends BaseController implements HttpHandler {
         }
 
         Optional<User> profile = userService.getUserById(requestedUserId);
-        sendJson(ex, 200, profile);
+        if (profile.isEmpty()) {
+            sendText(ex, 404, "User not found");
+            return;
+        }
+        sendJson(ex, 200, profile.get());
     }
 
     private void updateProfile(HttpExchange ex) throws IOException {
@@ -161,6 +195,9 @@ public class UserController extends BaseController implements HttpHandler {
         }
 
         List<Rating> ratingHistory = ratingService.getRatingHistoryOfUser(requestedUserId);
+        if (ratingHistory.isEmpty()) {
+            sendText(ex, 404, "No ratings found");
+        }
         sendJson(ex, 200, ratingHistory);
     }
 
@@ -177,6 +214,9 @@ public class UserController extends BaseController implements HttpHandler {
         }
 
         List<MediaEntry> favorites = mediaService.getFavoriteMediaFrom(requestedUserId);
+        if (favorites.isEmpty()) {
+            sendText(ex, 404, "No ratings found");
+        }
         sendJson(ex, 200, favorites);
     }
 }

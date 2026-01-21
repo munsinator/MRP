@@ -47,19 +47,20 @@ public class RatingRepository {
     }
 
     public boolean update(Rating rating) {
-        String sql = "UPDATE rating SET created_by = ?, media_id = ?, is_public = ?, value = ?, comment = ? WHERE id = ?";
+        String sql = "UPDATE rating SET created_by = ?, is_public = ?, stars = ?, comment = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, rating.getCreatedBy());
-            ps.setObject(2, rating.getMediaId());
-            ps.setBoolean(3, rating.isPublic());
-            ps.setInt(4, rating.getStars());
+            ps.setBoolean(2, rating.isPublic());
+            ps.setInt(3, rating.getStars());
 
             if (rating.getComment() != null) {
-                ps.setString(5, rating.getComment());
+                ps.setString(4, rating.getComment());
             } else {
-                ps.setNull(5, Types.VARCHAR);
+                ps.setNull(4, Types.VARCHAR);
             }
+
+            ps.setObject(5, rating.getId());
 
             int updated = ps.executeUpdate();
             return updated > 0;
@@ -167,7 +168,7 @@ public class RatingRepository {
     }
 
     public boolean saveLike(UUID userId, UUID ratingId) {
-        String sql = "INSERT INTO rating_like (user_id, rating_id) VALUES (?, ?)";
+        String sql = "INSERT INTO rating_like (user_id, rating_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, userId);
@@ -180,6 +181,36 @@ public class RatingRepository {
         }
     }
 
+    public List<Rating> findVisibleRatingsForMedia(UUID mediaId, UUID userId) {
+        String sql = "SELECT id, created_by, media_id, is_public, stars, comment, created_at, updated_at FROM rating WHERE media_id = ? AND (is_public = TRUE OR created_by = ?) ORDER BY created_at DESC ";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, mediaId);
+            ps.setObject(2, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                List<Rating> out = new ArrayList<>();
+                while (rs.next()) out.add(mapToRating(rs));
+                return out;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("[Error] loading ratings ", e);
+        }
+    }
+
+    public double getAveragePublicScoreForMedia(UUID mediaId) {
+        String sql = "SELECT COALESCE(AVG(stars), 0) FROM rating WHERE media_id = ? AND is_public = TRUE ";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, mediaId);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("[Error] calculating avg score", e);
+        }
+    }
 
     private Rating mapToRating(ResultSet rs) throws SQLException {
         Timestamp createdAtTs = rs.getTimestamp("created_at");

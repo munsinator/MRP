@@ -6,7 +6,10 @@ import com.sun.net.httpserver.HttpExchange;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public abstract class BaseController {
@@ -73,5 +76,24 @@ public abstract class BaseController {
             return null;
         }
     }
+
+    //Helps extracting the paramaters of a query
+    protected Map<String, String> queryParams(HttpExchange ex) {
+        Map<String, String> parameters = new HashMap<>();
+        String query = ex.getRequestURI().getRawQuery();
+
+        if (query == null || query.isEmpty()) return parameters;
+
+        for (String pair : query.split("&")) {
+            String[] kv = pair.split("=", 2);
+            String key = URLDecoder.decode(kv[0], StandardCharsets.UTF_8);
+            String value = kv.length > 1
+                    ? URLDecoder.decode(kv[1], StandardCharsets.UTF_8)
+                    : "";
+            parameters.put(key, value);
+        }
+        return parameters;
+    }
+
 
 }

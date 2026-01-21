@@ -1,9 +1,13 @@
 package at.fh.service;
+import at.fh.dto.MediaDetailsResponse;
 import at.fh.dto.MediaInput;
+import at.fh.dto.MediaSearchParams;
 import at.fh.model.Genre;
 import at.fh.model.MediaEntry;
+import at.fh.model.Rating;
 import at.fh.repository.GenreRepository;
 import at.fh.repository.MediaEntryRepository;
+import at.fh.repository.RatingRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +17,12 @@ import java.util.UUID;
 public class MediaService {
     private final MediaEntryRepository mediaRepository;
     private final GenreRepository genreRepository;
+    private final RatingRepository ratingRepository;
 
-    public MediaService(MediaEntryRepository mediaRepository, GenreRepository genreRepository) {
+    public MediaService(MediaEntryRepository mediaRepository, GenreRepository genreRepository, RatingRepository ratingRepository) {
         this.mediaRepository = mediaRepository;
         this.genreRepository = genreRepository;
+        this.ratingRepository = ratingRepository;
     }
 
     public List<MediaEntry> findAll() {
@@ -114,4 +120,33 @@ public class MediaService {
     public boolean unlikeMedia(UUID mediaId, UUID userId){
         return mediaRepository.unfavoriteMedia(userId, mediaId);
     }
+
+    public Optional<MediaDetailsResponse> getDetails(UUID mediaId, UUID userId) {
+        Optional<MediaEntry> mediaOpt = mediaRepository.findById(mediaId);
+        if (mediaOpt.isEmpty()) return Optional.empty();
+
+        MediaEntry media = mediaOpt.get();
+
+        double avg = ratingRepository.getAveragePublicScoreForMedia(mediaId);
+        List<Rating> ratings = ratingRepository.findVisibleRatingsForMedia(mediaId, userId);
+
+
+        MediaDetailsResponse resp = new MediaDetailsResponse(
+                media.getId(),
+                media.getTitle(),
+                media.getDescription(),
+                media.getReleaseYear(),
+                media.getAgeRestriction(),
+                media.getMediaType() != null ? media.getMediaType().name() : null,
+                avg,
+                ratings
+        );
+
+        return Optional.of(resp);
+    }
+
+    public List<MediaEntry> search(MediaSearchParams req) {
+        return mediaRepository.findByParams(req);
+    }
+
 }

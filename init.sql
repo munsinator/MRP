@@ -36,6 +36,7 @@ CREATE TABLE rating (
     stars INT CHECK (stars BETWEEN 1 AND 5) NOT NULL,
     comment VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (media_id) REFERENCES media_entry(id) ON DELETE CASCADE,
     UNIQUE (created_by, media_id)
@@ -63,5 +64,6 @@ ALTER TABLE users
 ALTER TABLE users
     ADD COLUMN email VARCHAR(255);
 
-INSERT INTO users (id, username, password_hash) VALUES
-                                     ('11111111-1111-1111-1111-111111111111', 'system_user', 'password');
+ALTER TABLE media_entry
+    ADD COLUMN media_type VARCHAR(50) NOT NULL;
+

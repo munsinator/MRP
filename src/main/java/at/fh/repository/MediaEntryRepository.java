@@ -1,7 +1,10 @@
 package at.fh.repository;
 
+import at.fh.constants.MediaType;
+import at.fh.dto.MediaSearchParams;
 import at.fh.model.Genre;
 import at.fh.model.MediaEntry;
+import at.fh.repository.mapper.MediaEntryMapper;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -72,14 +75,14 @@ public class MediaEntryRepository {
     }
 
     public Optional<MediaEntry> findById(UUID id) {
-        String sql = "SELECT id, created_by, created_at, title, description, release_year, age_restriction  FROM media_entry WHERE id = ?";
+        String sql = "SELECT id, created_by, created_at, title, description, release_year, age_restriction, media_type  FROM media_entry WHERE id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, id);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapToMediaEntry(rs));
+                    return Optional.of(MediaEntryMapper.map(rs));
                 }
                 return Optional.empty();
             }
@@ -90,7 +93,7 @@ public class MediaEntryRepository {
     }
 
     public List<MediaEntry> findAll() {
-        String sql = "SELECT id, created_by, created_at, title, description, release_year, age_restriction FROM media_entry ORDER BY created_at DESC";
+        String sql = "SELECT id, created_by, created_at, title, description, release_year, age_restriction, media_type FROM media_entry ORDER BY created_at DESC";
 
         List<MediaEntry> list = new ArrayList<>();
 
@@ -98,7 +101,7 @@ public class MediaEntryRepository {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                list.add(mapToMediaEntry(rs));
+                list.add(MediaEntryMapper.map(rs));
             }
             return list;
 
@@ -175,7 +178,7 @@ public class MediaEntryRepository {
     }
 
     public List<MediaEntry> getFavoriteMediaFrom(UUID userId){
-        String sql = "SELECT m.id, m.title, m.description, m.release_year, m.age_restriction, m.created_at, m.created_by FROM media_entry m JOIN media_favorite mf ON mf.media_id = m.id WHERE mf.user_id = ? ORDER BY m.created_at DESC ";
+        String sql = "SELECT m.id, m.title, m.description, m.release_year, m.age_restriction, m.media_type, m.created_at, m.created_by FROM media_entry m JOIN media_favorite mf ON mf.media_id = m.id WHERE mf.user_id = ? ORDER BY m.created_at DESC ";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setObject(1, userId);
@@ -184,7 +187,7 @@ public class MediaEntryRepository {
                 List<MediaEntry> mediaEntries = new ArrayList<>();
 
                 while (rs.next()) {
-                    mediaEntries.add(mapToMediaEntry(rs));
+                    mediaEntries.add(MediaEntryMapper.map(rs));
                 }
 
                 return mediaEntries;
@@ -195,18 +198,69 @@ public class MediaEntryRepository {
         }
     }
 
-    private MediaEntry mapToMediaEntry(ResultSet rs) throws SQLException {
-        Timestamp ts = rs.getTimestamp("created_at");
-        LocalDateTime createdAt = (ts != null) ? ts.toLocalDateTime() : null;
+    public List<MediaEntry> findByParams(MediaSearchParams request) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT m.*, COALESCE(AVG(r.score),0) AS rating
+        FROM media m
+        LEFT JOIN rating r ON r.media_id = m.id
+        LEFT JOIN media_genre mg ON mg.media_id = m.id
+        LEFT JOIN genre g ON g.id = mg.genre_id
+        WHERE 1=1
+    """);
 
-        return new MediaEntry.Builder()
-                .id((UUID) rs.getObject("id"))
-                .createdBy((UUID) rs.getObject("created_by"))
-                .createdAt(createdAt)
-                .title(rs.getString("title"))
-                .description(rs.getString("description"))
-                .releaseYear(rs.getInt("release_year"))
-                .ageRestriction(rs.getInt("age_restriction"))
-                .build();
+        List<Object> params = new ArrayList<>();
+
+        if (request.title() != null) {
+            sql.append(" AND LOWER(m.title) LIKE ?");
+            params.add("%" + request.title().toLowerCase() + "%");
+        }
+        if (request.genre() != null) {
+            sql.append(" AND g.name = ?");
+            params.add(request.genre());
+        }
+        if (request.mediaType() != null) {
+            sql.append(" AND m.media_type = ?");
+            params.add(request.mediaType());
+        }
+        if (request.releaseYear() != null) {
+            sql.append(" AND m.release_year = ?");
+            params.add(request.releaseYear());
+        }
+        if (request.ageRestriction() != null) {
+            sql.append(" AND m.age_restriction <= ?");
+            params.add(request.ageRestriction());
+        }
+
+        sql.append(" GROUP BY m.id ");
+
+        if (request.minRating() != null) {
+            sql.append(" HAVING AVG(r.score) >= ?");
+            params.add(request.minRating());
+        }
+
+        sql.append(" ORDER BY ");
+        sql.append(
+                switch (request.sortBy()) {
+                    case "year" -> "m.release_year";
+                    case "score" -> "rating DESC";
+                    default -> "m.title";
+        });
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            List<MediaEntry> mediaEntries = new ArrayList<>();
+
+            while (rs.next())
+                mediaEntries.add(MediaEntryMapper.map(rs));
+
+            return mediaEntries;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,6 +1,8 @@
 package at.fh.controller;
 
+import at.fh.dto.MediaDetailsResponse;
 import at.fh.dto.MediaInput;
+import at.fh.dto.MediaSearchParams;
 import at.fh.dto.RatingInput;
 import at.fh.model.MediaEntry;
 import at.fh.service.AuthService;
@@ -11,6 +13,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,6 +37,11 @@ public class MediaController extends BaseController implements HttpHandler {
 
         try {
             if (path.equals("/") || path.isEmpty()) {
+                if (method.equals("GET") && ex.getRequestURI().getQuery() != null) {
+                    searchMedia(ex);
+                    return;
+                }
+
                 switch (method) {
                     case "GET":
                         findAllMedia(ex);
@@ -45,7 +53,7 @@ public class MediaController extends BaseController implements HttpHandler {
                         sendText(ex, 405, "Not a valid method");
                         return;
                 }
-            } else if ((path.matches("^/[^/]+$"))) { //TODO: Regex bearbeiten!
+            } else if ((path.matches("^/[^/]+$"))) {
                 switch (method) {
                     case "GET":
                         findMediaById(ex);
@@ -99,8 +107,7 @@ public class MediaController extends BaseController implements HttpHandler {
             return;
         }
 
-        ex.sendResponseHeaders(200, -1);
-        ex.close();
+        sendJson(ex, 200, result);
     }
 
     private void createMedia(HttpExchange ex) throws IOException {
@@ -112,7 +119,7 @@ public class MediaController extends BaseController implements HttpHandler {
 
         boolean success = mediaService.create(req, userId);
         if (!success) {
-            sendText(ex, 404, "Media not found");
+            sendText(ex, 404, "Invalid input");
             return;
         }
 
@@ -125,12 +132,12 @@ public class MediaController extends BaseController implements HttpHandler {
 
         UUID mediaId = extractUuid(ex);
 
-        Optional<MediaEntry> result = mediaService.findById(mediaId);
+        Optional<MediaDetailsResponse> result = mediaService.getDetails(mediaId, userId);
         if (result.isEmpty()) {
             sendText(ex, 404, "Media not found");
             return;
         }
-        sendJson(ex, 200, result);
+        sendJson(ex, 200, result.get());
     }
 
     private void updateMedia(HttpExchange ex) throws IOException {
@@ -211,6 +218,23 @@ public class MediaController extends BaseController implements HttpHandler {
             return;
         }
 
-        sendText(ex, 204, "Unmarked");
+        ex.sendResponseHeaders(204, -1);
+        ex.close();
+    }
+
+    private void searchMedia(HttpExchange ex) throws IOException {
+        Map<String,String> q = queryParams(ex);
+
+        MediaSearchParams p = new MediaSearchParams(
+                q.get("title"),
+                q.get("genre"),
+                q.get("type"),
+                q.containsKey("year") ? Integer.valueOf(q.get("year")) : null,
+                q.containsKey("age") ? Integer.valueOf(q.get("age")) : null,
+                q.containsKey("rating") ? Double.valueOf(q.get("rating")) : null,
+                q.get("sort")
+        );
+
+        sendJson(ex, 200, mediaService.search(p));
     }
 }

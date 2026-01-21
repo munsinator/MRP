@@ -83,12 +83,11 @@ public class RatingService {
         return ratingRepository.update(updatedRating);
     }
 
-    public boolean likeRating(UUID ratingId) {
-        Optional<Rating> existing = ratingRepository.findById(ratingId);
-
-        if (existing.isEmpty())
+    public boolean likeRating(UUID ratingId, UUID userId) {
+        if (ratingRepository.findById(ratingId).isEmpty())
             return false;
 
-        return ratingRepository.saveLike(ratingId,existing.get().getCreatedBy());
+        return ratingRepository.saveLike(userId, ratingId);
     }
+
 }

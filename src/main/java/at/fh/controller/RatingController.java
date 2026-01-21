@@ -83,7 +83,7 @@ public class RatingController extends BaseController implements HttpHandler {
         UUID loggedInUserId = authorizeUser(ex);
         if (loggedInUserId == null) return;
         UUID ratingId = extractUuid(ex);
-        boolean success = ratingService.likeRating(ratingId);
+        boolean success = ratingService.likeRating(ratingId, loggedInUserId);
 
         if (!success) {
             sendText(ex, 404, "Rating not found");

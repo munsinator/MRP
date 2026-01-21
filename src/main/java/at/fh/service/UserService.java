@@ -2,8 +2,10 @@ package at.fh.service;
 
 import at.fh.dto.UserCredentials;
 import at.fh.dto.UserProfileUpdate;
+import at.fh.dto.UserStatistics;
 import at.fh.model.Rating;
 import at.fh.model.User;
+import at.fh.repository.LeaderboardRepository;
 import at.fh.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -15,10 +17,12 @@ import java.util.concurrent.RecursiveTask;
 public class UserService {
     private final UserRepository userRepository;
     private final AuthService authService;
+    private final LeaderboardRepository leaderboardRepository;
 
-    public UserService(UserRepository userRepo, AuthService authService) {
+    public UserService(UserRepository userRepo, LeaderboardRepository leaderboardRepo, AuthService authService) {
         this.userRepository = userRepo;
         this.authService = authService;
+        this.leaderboardRepository = leaderboardRepo;
     }
 
     //create user
@@ -27,7 +31,7 @@ public class UserService {
                 .id(UUID.randomUUID())
                 .username(newUser.username())
                 .passwordHash(newUser.passwordHash())
-                .build(); // TODO: hashing später!!!
+                .build();
 
         userRepository.save(user);
     }
@@ -83,4 +87,7 @@ public class UserService {
        return userRepository.delete(userId);
     }
 
+    public List<UserStatistics> getLeaderboard() {
+        return leaderboardRepository.leaderboard();
+    }
 }

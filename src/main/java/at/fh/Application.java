@@ -1,17 +1,12 @@
 package at.fh;
 
 import at.fh.config.DatabaseConfig;
+import at.fh.controller.LeaderboardController;
 import at.fh.controller.MediaController;
 import at.fh.controller.RatingController;
 import at.fh.controller.UserController;
-import at.fh.repository.GenreRepository;
-import at.fh.repository.MediaEntryRepository;
-import at.fh.repository.RatingRepository;
-import at.fh.repository.UserRepository;
-import at.fh.service.AuthService;
-import at.fh.service.MediaService;
-import at.fh.service.RatingService;
-import at.fh.service.UserService;
+import at.fh.repository.*;
+import at.fh.service.*;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -28,15 +23,19 @@ public class Application {
         MediaEntryRepository mediaRepository = new MediaEntryRepository(dbConnection);
         GenreRepository genreRepository = new GenreRepository(dbConnection);
         RatingRepository  ratingRepository = new RatingRepository(dbConnection);
+        RecommendationRepository recommendationRepository = new RecommendationRepository(dbConnection);
+        LeaderboardRepository leaderboardRepository = new LeaderboardRepository(dbConnection);
 
         AuthService authService = new AuthService();
-        UserService userService = new UserService(userRepository, authService);
-        MediaService mediaService = new MediaService(mediaRepository,  genreRepository);
+        UserService userService = new UserService(userRepository, leaderboardRepository, authService);
+        MediaService mediaService = new MediaService(mediaRepository,  genreRepository, ratingRepository);
         RatingService ratingService = new RatingService(ratingRepository);
+        RecommendationService recommendationService = new RecommendationService(recommendationRepository);
 
-        UserController userController = new UserController(userService,authService, ratingService, mediaService);
+        UserController userController = new UserController(userService,authService, ratingService, mediaService, recommendationService);
         MediaController mediaController = new MediaController(mediaService, ratingService, authService);
         RatingController ratingController = new RatingController(ratingService, authService);
+        LeaderboardController leaderboardController = new LeaderboardController(userService, authService);
 
         //Für Testzwecke
         server.createContext("/health", exchange -> {
@@ -49,6 +48,7 @@ public class Application {
         server.createContext("/api/users", userController::handle);
         server.createContext("/api/media", mediaController::handle);
         server.createContext("/api/ratings", ratingController::handle);
+        server.createContext("/api/leaderboard", leaderboardController::handle);
 
         server.start();
         System.out.println("Server running on port 8080...");
